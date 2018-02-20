@@ -1,6 +1,6 @@
-Package: MorbiditySpain
+Package: MorbiditySpainR
 Type: Package
-Title: Show data from Encuesta de morbilidad hospitalaria
+Title: Read and manipualte data from Encuesta de morbilidad hospitalaria INE
 Version: 0.1.0
 Author: Rafael Menéndez
 Maintainer: Rafael Menéndez <spain.morbidity@gmail.com>
