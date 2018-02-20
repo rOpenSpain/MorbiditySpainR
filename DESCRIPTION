@@ -1,0 +1,17 @@
+Package: MorbiditySpain
+Type: Package
+Title: Show data from Encuesta de morbilidad hospitalaria
+Version: 0.1.0
+Author: Rafael Menéndez
+Maintainer: Rafael Menéndez <spain.morbidity@gmail.com>
+Description: Show data from Encuesta de morbilidad hospitalaria
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports:
+    readr,
+    dplyr,
+    ggplot2,
+    seasonal,
+    dplyr,
+    lubridate

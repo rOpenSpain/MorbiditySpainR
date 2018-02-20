@@ -1,0 +1,3 @@
+importFrom("readr",  "read_fwf", "fwf_widths")
+
+exportPattern("^[[:alpha:]]+")
