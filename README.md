@@ -2,7 +2,7 @@
 
 [![Build Status](https://api.travis-ci.org/rafaelmenmell/MorbiditySpainR.svg?branch=master)](https://travis-ci.org/rafaelmenmell/MorbiditySpainR)
 
-R package to read, parse and do basic manipation of INE Morbidity microdata [Morbilidad Hospitalaria Microdatos INE](http://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&secc=1254736195291&idp=1254735573175). 
+R package to read, parse and do basic manipulation of INE Morbidity microdata [Morbilidad Hospitalaria Microdatos INE](http://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&secc=1254736195291&idp=1254735573175). 
 The metadata of the microdata is documented [here](http://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&secc=1254736195291&idp=1254735573175).
 
 This packages uses international classification of diseases documented [here](https://eciemaps.msssi.gob.es/ecieMaps/browser/index_9_mc.html)
