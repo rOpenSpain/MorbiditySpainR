@@ -1,3 +1,15 @@
+#' @title Reduce data to temporal serie
+#' @description Reduce morbidity data to temporal serie, including diagnosis, province or sex
+#' @param data Morbidity data
+#' @param province Boolean, reduce by provicia
+#' @param date day, month or year
+#' @param diag diag1, daig2, diag3, if NULL not reduced by diagnosis
+#' @param sex Boolean, reduce by sex
+#' @return data frame with data serie of morbidity
+#' @details Uses group_by
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterProvincia(provincia = 28) %>% FilterEmergency() %>% AddDiagnosis1() %>% AddDiagnosis2() %>% FilterDiagnosis2(diagnosis_id = 19) %>% ReduceData(provincia = TRUE,date = "day")
+
 ReduceData <- function(data,provincia=TRUE,date="day",diag=NULL,sex=FALSE){
   if(provincia){
     data <- data %>% dplyr::group_by(prov=prov_hosp)
@@ -43,6 +55,15 @@ ReduceData <- function(data,provincia=TRUE,date="day",diag=NULL,sex=FALSE){
   data <- data %>% dplyr::summarise(total=n())
   return(data)
 }
+
+#' @title Calculate prevalence, relative values.
+#' @description Calculate prevalence, relative values by total population of preovince
+#' @param data Morbidity data
+#' @param pop total, male, females
+#' @return relative values of prevalence
+#' @details Uses poblacion
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>%  ReduceData(provincia = TRUE,date="year") %>% SetPrevalence()
 
 SetPrevalence <- function(data,pop="total"){
   data <- data %>% dplyr::filter(lubridate::year(fecha)>=2000)
