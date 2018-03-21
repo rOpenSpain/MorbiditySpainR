@@ -41,10 +41,11 @@ ReduceData <- function(data,provincia=TRUE,date="day",diag=NULL,sex=FALSE){
     data <- data %>% dplyr::group_by(sex=sexo,add=TRUE)
   }
   data <- data %>% dplyr::summarise(total=n())
+  return(data)
 }
 
 SetPrevalence <- function(data,pop="total"){
-  data <- data %>% dplyr::filter(year(fecha)>=2000)
+  data <- data %>% dplyr::filter(lubridate::year(fecha)>=2000)
   if (nrow(data)==0){
     stop("De momento esta funcion no soporta años anteriores a 2000")
   }
@@ -56,13 +57,13 @@ SetPrevalence <- function(data,pop="total"){
     stop("You have to choose, total, males or females")
   }
   provs <- unique(data$prov)
-  years <- unique(year(as.Date(data$fecha)))
+  years <- unique(lubridate::year(as.Date(data$fecha)))
   for (p in provs){
     for (y in years){
       prov <- provincias[provincias$Codigo==p,]$nombre
       pob <- poblacion %>% dplyr::filter(tipo==pop) %>% dplyr::filter(year==y) %>% dplyr::filter(provincia==prov)
       pob <- as.numeric(pob$pob)
-      data[data$prov==p & year(data$fecha)==y,]$total.prev <- round(data[data$prov==p & year(as.Date(data$fecha))==y,]$total / (pob / 100000), 4)
+      data[data$prov==p & lubridate::year(data$fecha)==y,]$total.prev <- round(data[data$prov==p & lubridate::year(as.Date(data$fecha))==y,]$total / (pob / 100000), 4)
     }
   }
   return(data)

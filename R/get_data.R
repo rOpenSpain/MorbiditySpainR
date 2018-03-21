@@ -1,3 +1,11 @@
+#' @title Download and read morbidity data
+#' @description Download morbidity data from INE ftp and parse it
+#' @param year Year of morbidity data
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
+#' @details Uses read.fwf 
+#' @examples
+#' data <- ReadZip(2010)
+
 ReadZip <- function(year){
   #descomprime
   #filezip <- sprintf("https://github.com/rafaelmenmell/MorbiditySpain/raw/master/data/datos_morbi%s.zip",substr(year,3,4))
@@ -34,6 +42,14 @@ ReadZip <- function(year){
   return(data)
 }
 
+#' @title Download and read morbidity data for several years
+#' @description Download morbidity data from INE ftp and parse it
+#' @param year1 Begining year of morbidity data
+#' @param year2 Ending year of morbidity data
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
+#' @details Uses ReadZip
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011)
 
 GetMorbiData <- function(y1=2005,y2=2015){
   ys <- y1:y2
@@ -44,9 +60,18 @@ GetMorbiData <- function(y1=2005,y2=2015){
     data.m[[n]] <- suppressMessages(ReadZip(y))
     n <- n+1
   }
-  data.m <- bind_rows(data.m)
+  data.m <- dplyr::bind_rows(data.m)
   return(data.m)
 }
+
+#' @title Filter morbidity by provincia
+#' @description Filter morbidity by provincia using official id of provincias
+#' @param data Morbidity data
+#' @param provincia ID of provincia
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
+#' @details Uses dplyr filter
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterProvincia(28)
 
 FilterProvincia <- function(data,provincia){
   if (!(provincia %in% 1:52)){
@@ -57,10 +82,27 @@ FilterProvincia <- function(data,provincia){
   return(data)
 }
 
+#' @title Filter morbidity by ER item
+#' @description Filter morbidity by ER
+#' @param data Morbidity data
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
+#' @details Uses dplyr filter
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterEmergency()
+
 FilterEmergency <- function(data){
   data <- data %>% dplyr::filter(diag_in==2)
   return(data)
 }
+
+#' @title Filter morbidity by principal diagnosis
+#' @description Filter morbidity by principal diagnosis following international classification of diseases
+#' @param data Morbidity data
+#' @param diagnosis_id id of principal diagnosis
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
+#' @details Uses dplyr filter
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterDiagnosis1(2)
 
 FilterDiagnosis1 <- function(data,diagnosis_id){
   if (!(diagnosis_id %in% 1:17)) {
@@ -69,9 +111,18 @@ FilterDiagnosis1 <- function(data,diagnosis_id){
   }
   dd <- diag1 %>% dplyr::filter(id == diagnosis_id)
   data$temp <- as.numeric(substr(gsub("V","",data$diag_ppal),1,3))
-  data <- data %>% dplyr::filter(temp >= dd$start) %>% dplyr::filter(temp <= dd$end) %>% select(-temp)
+  data <- data %>% dplyr::filter(temp >= dd$start) %>% dplyr::filter(temp <= dd$end) %>% dplyr::select(-temp)
   return(data)
 }
+
+#' @title Filter morbidity by secondary diagnosis
+#' @description Filter morbidity by secondary diagnosis following international classification of diseases
+#' @param data Morbidity data
+#' @param diagnosis_id id of secondary diagnosis
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
+#' @details Uses dplyr filter
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterDiagnosis2(20)
 
 FilterDiagnosis2 <- function(data,diagnosis_id){
   if (!(diagnosis_id %in% 1:123)) {
@@ -82,19 +133,26 @@ FilterDiagnosis2 <- function(data,diagnosis_id){
   if (!dd$V) {
     data <- data %>% dplyr::filter(grepl("V",diag_ppal) == FALSE)
     data$temp <- as.numeric(substr(gsub("V","",data$diag_ppal),1,3))
-    data <-  data %>% dplyr::filter(temp >= dd$start) %>% dplyr::filter(temp <= dd$end) %>% select(-temp)
+    data <-  data %>% dplyr::filter(temp >= dd$start) %>% dplyr::filter(temp <= dd$end) %>% dplyr::select(-temp)
   } else {
     data <- data %>% dplyr::filter(grepl("V",diag_ppal) == TRUE)
     data$temp <- as.numeric(substr(gsub("V","",data$diag_ppal),1,2))
-    data <- data  %>% dplyr::filter(temp >= as.numeric(gsub("V","",dd$start))) %>% dplyr::filter(temp <= as.numeric(gsub("V","",dd$end))) %>% select(-temp)
+    data <- data  %>% dplyr::filter(temp >= as.numeric(gsub("V","",dd$start))) %>% dplyr::filter(temp <= as.numeric(gsub("V","",dd$end))) %>% dplyr::select(-temp)
   }
   return(data)
 }
 
+#' @title Add principal diagnosis to morbity data
+#' @description Add principal diagnosis following international classification of diseases
+#' @param data Morbidity data
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad, diag1
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>% AddDiagnosis1()
+
 AddDiagnosis1 <- function(data){
   data$diag1 <- NA
   for (i in 1:nrow(diag1)){
-    cat(sprintf("%s de %s\r",i,nrow(diag1)))
+    message(sprintf("%s de %s\r",i,nrow(diag1)),appendLF = FALSE)
     start <- diag1[i,]$start
     end <- diag1[i,]$end
     id <- diag1[i,]$id
@@ -103,14 +161,21 @@ AddDiagnosis1 <- function(data){
       data[data$temp>=start & data$temp<=end,]$diag1 <- id
     }
   }
-  data <- data %>% select(-temp)
+  data <- data %>% dplyr::select(-temp)
   return(data)
 }
+
+#' @title Add secondary diagnosis to morbity data
+#' @description Add secondary diagnosis following international classification of diseases
+#' @param data Morbidity data
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad, diag2
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>% AddDiagnosis2()
 
 AddDiagnosis2 <- function(data){
   data$diag2 <- NA
   for (i in 1:nrow(diag2)){
-    cat(sprintf("%s de %s\r",i,nrow(diag2)))
+    message(sprintf("%s de %s\r",i,nrow(diag2)),appendLF = FALSE)
     start <- as.numeric(gsub("V","",diag2[i,]$start))
     end <- as.numeric(gsub("V","",diag2[i,]$end))
     id <- diag2[i,]$id
@@ -126,9 +191,16 @@ AddDiagnosis2 <- function(data){
       }
     }
   }
-  data <- data %>% select(-temp)
+  data <- data %>% dplyr::select(-temp)
   return(data)
 }
+
+#' @title Get specific diagnosis
+#' @description Get specific diagnosis following international classification of diseases
+#' @param codigo code from morbidity data
+#' @return Specific diagnosis
+#' @examples
+#' data <- TraduceCodigoEspecifico(3019)
 
 TraduceCodigoEspecifico <- function(codigo){
   if (nchar(codigo)==4){
@@ -144,12 +216,19 @@ TraduceCodigoEspecifico <- function(codigo){
   return(info)
 }
 
+#' @title Add specific diagnosis to morbity data
+#' @description Add specific diagnosis following international classification of diseases
+#' @param data Morbidity data
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad, diag3
+#' @examples
+#' data <- GetMorbiData(y1=2010,y2=2011) %>% AddDiagnosis3()
+
 AddDiagnosis3 <- function(data){
   codes <- unique(data$diag_ppal)
   data$diag3 <- NA
   for (code in codes){
     i <- 1
-    cat(sprintf("%s de %s\r",i,length(codes)))
+    message(sprintf("%s de %s\r",i,length(codes)),appendLF = FALSE)
     diag3 <- TraduceCodigoEspecifico(code)
     data[data$diag_ppal==code,]$diag3 <- diag3
     i <- i + 1
