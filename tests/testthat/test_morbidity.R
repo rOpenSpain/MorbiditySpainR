@@ -1,0 +1,27 @@
+library(MorbiditySpainR)
+
+context("Morbidity packages test")
+
+#GetMorbiData
+test_that("Todas las funciones",{
+  expect_equal(nrow(data_test),9188986)
+  expect_equal(as.numeric(data_test[1000,"edad"]),60)
+  result1 <- data_test %>% FilterProvincia(provincia = 28)
+  expect_equal(nrow(result1),1335480)
+  expect_equal(as.numeric(result1[1000,"edad"]),41)
+  result2 <- result1 %>% FilterEmergency()
+  expect_equal(nrow(result2),725128)
+  expect_equal(as.numeric(result2[1000,"edad"]),86)
+  result3 <- result2 %>% AddDiagnosis1()
+  expect_equal(as.numeric(result3[1000,"diag1"]),2)
+  result4 <- result2 %>% AddDiagnosis2()
+  expect_equal(as.numeric(result4[1000,"diag2"]),18)
+  result5 <- result4 %>% FilterDiagnosis1(diagnosis_id = 2)
+  expect_equal(nrow(result5),33507)
+  expect_equal(as.numeric(result5[1000,"diag2"]),19)
+  result6 <- result5 %>% FilterDiagnosis2(diagnosis_id = 19)
+  expect_equal(nrow(result6),4898)
+  expect_equal(as.numeric(result6[1000,"edad"]),66)
+  result7 <- result6 %>% AddDiagnosis3()
+  expect_equal(result7[1000,]$diag3," Bronchus and lung, unspecified")
+})

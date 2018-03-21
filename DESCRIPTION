@@ -3,8 +3,7 @@ Type: Package
 Title: Read and manipualte data from Encuesta de morbilidad hospitalaria INE
 Version: 0.1.0
 Author: Rafael Menéndez [aut, cre]
-Authors@R: c(person("Rafael", "Menéndez", role = c("aut", "cre"),
-                     email = "spain.morbidity@gmail.com")
+Authors@R: person("Rafael", "Menéndez", role = c("aut", "cre"),email = "spain.morbidity@gmail.com")
 Maintainer: Rafael Menéndez <spain.morbidity@gmail.com>
 Description: Show data from Encuesta de morbilidad hospitalaria
 License: GPL-2
@@ -18,3 +17,5 @@ Imports:
     seasonal,
     dplyr,
     lubridate
+RoxygenNote: 6.0.1
+Suggests: testthat
