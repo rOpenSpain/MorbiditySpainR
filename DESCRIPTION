@@ -5,7 +5,8 @@ Version: 0.1.0
 Author: Rafael Menéndez
 Maintainer: Rafael Menéndez <spain.morbidity@gmail.com>
 Description: Show data from Encuesta de morbilidad hospitalaria
-License: What license is it under?
+License: GPL-2
+URL: https://github.com/rafaelmenmell/MorbiditySpainR
 Encoding: UTF-8
 LazyData: true
 Imports:
