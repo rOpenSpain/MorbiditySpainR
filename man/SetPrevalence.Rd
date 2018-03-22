@@ -21,5 +21,5 @@ Calculate prevalence, relative values by total population of preovince
 Uses poblacion
 }
 \examples{
-data <- GetMorbiData(y1=2010,y2=2011) \%>\%  ReduceData(provincia = TRUE,date="year") \%>\% SetPrevalence()
+data <- data_ejemplo \%>\%  ReduceData(provincia = TRUE,date="year") \%>\% SetPrevalence()
 }

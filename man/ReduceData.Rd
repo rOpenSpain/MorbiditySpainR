@@ -28,5 +28,5 @@ Reduce morbidity data to temporal serie, including diagnosis, province or sex
 Uses group_by
 }
 \examples{
-data <- GetMorbiData(y1=2010,y2=2011) \%>\% FilterProvincia(provincia = 28) \%>\% FilterEmergency() \%>\% AddDiagnosis1() \%>\% AddDiagnosis2() \%>\% FilterDiagnosis2(diagnosis_id = 19) \%>\% ReduceData(provincia = TRUE,date = "day")
+data <- data_ejemplo \%>\% ReduceData(provincia = TRUE,date = "day")
 }

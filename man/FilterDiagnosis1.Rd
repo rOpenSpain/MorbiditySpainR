@@ -21,5 +21,5 @@ Filter morbidity by principal diagnosis following international classification o
 Uses dplyr filter
 }
 \examples{
-data <- GetMorbiData(y1=2010,y2=2011) \%>\% FilterDiagnosis1(2)
+data <- data_ejemplo \%>\% FilterDiagnosis1(2)
 }

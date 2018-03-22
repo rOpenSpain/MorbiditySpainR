@@ -71,7 +71,7 @@ GetMorbiData <- function(y1=2005,y2=2015){
 #' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
 #' @details Uses dplyr filter
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterProvincia(28)
+#' data <- data_ejemplo %>% FilterProvincia(28)
 
 FilterProvincia <- function(data,provincia){
   if (!(provincia %in% 1:52)){
@@ -88,7 +88,7 @@ FilterProvincia <- function(data,provincia){
 #' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
 #' @details Uses dplyr filter
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterEmergency()
+#' data <- data_ejemplo %>% FilterEmergency()
 
 FilterEmergency <- function(data){
   data <- data %>% dplyr::filter(diag_in==2)
@@ -102,7 +102,7 @@ FilterEmergency <- function(data){
 #' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
 #' @details Uses dplyr filter
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterDiagnosis1(2)
+#' data <- data_ejemplo %>% FilterDiagnosis1(2)
 
 FilterDiagnosis1 <- function(data,diagnosis_id){
   if (!(diagnosis_id %in% 1:17)) {
@@ -122,7 +122,7 @@ FilterDiagnosis1 <- function(data,diagnosis_id){
 #' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
 #' @details Uses dplyr filter
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterDiagnosis2(20)
+#' data <- data_ejemplo %>% FilterDiagnosis2(20)
 
 FilterDiagnosis2 <- function(data,diagnosis_id){
   if (!(diagnosis_id %in% 1:123)) {
@@ -147,7 +147,7 @@ FilterDiagnosis2 <- function(data,diagnosis_id){
 #' @param data Morbidity data
 #' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad, diag1
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>% AddDiagnosis1()
+#' data <- data_ejemplo %>% AddDiagnosis1()
 
 AddDiagnosis1 <- function(data){
   data$diag1 <- NA
@@ -170,7 +170,7 @@ AddDiagnosis1 <- function(data){
 #' @param data Morbidity data
 #' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad, diag2
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>% AddDiagnosis2()
+#' data <- data_ejemplo %>% AddDiagnosis2()
 
 AddDiagnosis2 <- function(data){
   data$diag2 <- NA
@@ -221,7 +221,7 @@ TraduceCodigoEspecifico <- function(codigo){
 #' @param data Morbidity data
 #' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad, diag3
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>% AddDiagnosis3()
+#' data <- data_ejemplo %>% AddDiagnosis3()
 
 AddDiagnosis3 <- function(data){
   codes <- unique(data$diag_ppal)

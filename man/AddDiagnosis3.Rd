@@ -16,5 +16,5 @@ data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, mo
 Add specific diagnosis following international classification of diseases
 }
 \examples{
-data <- GetMorbiData(y1=2010,y2=2011) \%>\% AddDiagnosis3()
+data <- data_ejemplo \%>\% AddDiagnosis3()
 }

@@ -8,7 +8,7 @@
 #' @return data frame with data serie of morbidity
 #' @details Uses group_by
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>% FilterProvincia(provincia = 28) %>% FilterEmergency() %>% AddDiagnosis1() %>% AddDiagnosis2() %>% FilterDiagnosis2(diagnosis_id = 19) %>% ReduceData(provincia = TRUE,date = "day")
+#' data <- data_ejemplo %>% ReduceData(provincia = TRUE,date = "day")
 
 ReduceData <- function(data,provincia=TRUE,date="day",diag=NULL,sex=FALSE){
   if(provincia){
@@ -63,7 +63,7 @@ ReduceData <- function(data,provincia=TRUE,date="day",diag=NULL,sex=FALSE){
 #' @return relative values of prevalence
 #' @details Uses poblacion
 #' @examples
-#' data <- GetMorbiData(y1=2010,y2=2011) %>%  ReduceData(provincia = TRUE,date="year") %>% SetPrevalence()
+#' data <- data_ejemplo %>%  ReduceData(provincia = TRUE,date="year") %>% SetPrevalence()
 
 SetPrevalence <- function(data,pop="total"){
   data <- data %>% dplyr::filter(lubridate::year(fecha)>=2000)

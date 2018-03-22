@@ -19,5 +19,5 @@ Filter morbidity by ER
 Uses dplyr filter
 }
 \examples{
-data <- GetMorbiData(y1=2010,y2=2011) \%>\% FilterEmergency()
+data <- data_ejemplo \%>\% FilterEmergency()
 }

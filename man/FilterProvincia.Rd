@@ -21,5 +21,5 @@ Filter morbidity by provincia using official id of provincias
 Uses dplyr filter
 }
 \examples{
-data <- GetMorbiData(y1=2010,y2=2011) \%>\% FilterProvincia(28)
+data <- data_ejemplo \%>\% FilterProvincia(28)
 }
