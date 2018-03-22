@@ -79,27 +79,42 @@ install_github("rafaelmenmell/MorbiditySpainR")</code></pre>
 <h2 class="hasAnchor">
 <a href="#downloading-and-reading-data" class="anchor"></a>Downloading and reading data</h2>
 <p>The function <code>GetMorbiData</code> recives the years to read morbidity data, downloads the files from INE’s ftp server and parses them.</p>
-<pre><code>data &lt;- MorbiditySpain::GetMorbiData()
+<pre><code>data &lt;- GetMorbiData(y1=2010,y2=2011)
 head(data)</code></pre>
 </div>
 <div id="filtering-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#filtering-data" class="anchor"></a>Filtering data</h2>
 <p>The function <code>FilterProvincia</code> recives the id of the <em>provincia</em> (regional administration) to filter data.</p>
-<pre><code>data &lt;- MorbiditySpain::FilterProvincia(provincia = 28)
+<pre><code>data &lt;- data &lt;- data_ejemplo %&gt;% FilterProvincia(28)
 head(data)</code></pre>
-<p>The function <code>FilterEmergency</code> recives a boolean (defect TRUE) ti filter data by wether or not is an ER item.</p>
-<pre><code>data &lt;- MorbiditySpain::FilterEmergency()
+<p>The function <code>FilterEmergency</code> recives a boolean (defect TRUE) to filter data by wether or not is an ER item.</p>
+<pre><code>data &lt;- data_ejemplo %&gt;% FilterEmergency()
+head(data)</code></pre>
+<p>The function <code>FilterDiagnosis</code> recives a integer (id of diagnosis) to filter data by principal diagnosis.</p>
+<pre><code>data &lt;- data_ejemplo %&gt;% FilterDiagnosis1(2)
+head(data)</code></pre>
+<p>The function <code>FilterDiagnosis2</code> recives a integer (id of diagnosis) to filter data by secondary diagnosis.</p>
+<pre><code>data &lt;- data_ejemplo %&gt;% FilterDiagnosis2(20)
 head(data)</code></pre>
 </div>
 <div id="manipulating-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#manipulating-data" class="anchor"></a>Manipulating data</h2>
+<p>The function <code>AddDiagnosis1</code> add column daig1 with principal diagnosis.</p>
+<pre><code>data &lt;- data_ejemplo %&gt;% AddDiagnosis1()
+head(data)</code></pre>
+<p>The function <code>AddDiagnosis2</code> add column daig2 with secondary diagnosis.</p>
+<pre><code>data &lt;- data_ejemplo %&gt;% AddDiagnosis2()
+head(data)</code></pre>
+<p>The function <code>AddDiagnosis3</code> add column daig3 with specific diagnosis.</p>
+<pre><code>data &lt;- data_ejemplo %&gt;% AddDiagnosis3()
+head(data)</code></pre>
 <p>The function <code>ReduceData</code> does different grouping manipulations by <em>provincia</em>, date, diagnosis or sex.</p>
-<pre><code>data &lt;- MorbiditySpain::ReduceData()
+<pre><code>data &lt;- data_ejemplo %&gt;% ReduceData(provincia = TRUE,date = "day")
 head(data)</code></pre>
 <p>The function <code>SetPrevalence</code> gets relative values from grouped values and population (total or by sex) of provinces.</p>
-<pre><code>data &lt;-MorbiditySpain::SetPrevalence(pop = "total")
+<pre><code>data &lt;- data_ejemplo %&gt;%  ReduceData(provincia = TRUE,date="year") %&gt;% SetPrevalence()
 head(data)</code></pre>
 </div>
 </div>

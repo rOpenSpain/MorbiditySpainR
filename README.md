@@ -20,7 +20,7 @@ The function `GetMorbiData` recives the years to read morbidity data, downloads 
 
 
 ```
-data <- MorbiditySpain::GetMorbiData()
+data <- GetMorbiData(y1=2010,y2=2011)
 head(data)
 ``` 
 
@@ -30,29 +30,64 @@ The function `FilterProvincia` recives the id of the _provincia_ (regional admin
 
 
 ```
-data <- MorbiditySpain::FilterProvincia(provincia = 28)
+data <- data <- data_ejemplo %>% FilterProvincia(28)
 head(data)
 ``` 
 
-The function `FilterEmergency` recives a boolean (defect TRUE) ti filter data by wether or not is  an ER item.
+The function `FilterEmergency` recives a boolean (defect TRUE) to filter data by wether or not is  an ER item.
 
 ```
-data <- MorbiditySpain::FilterEmergency()
+data <- data_ejemplo %>% FilterEmergency()
+head(data)
+``` 
+
+The function `FilterDiagnosis` recives a integer (id of diagnosis) to filter data by principal diagnosis.
+
+```
+data <- data_ejemplo %>% FilterDiagnosis1(2)
+head(data)
+``` 
+
+The function `FilterDiagnosis2` recives a integer (id of diagnosis) to filter data by secondary diagnosis.
+
+```
+data <- data_ejemplo %>% FilterDiagnosis2(20)
 head(data)
 ``` 
 
 ## Manipulating data
 
+The function `AddDiagnosis1` add column daig1 with principal diagnosis.
+
+```
+data <- data_ejemplo %>% AddDiagnosis1()
+head(data)
+``` 
+
+The function `AddDiagnosis2` add column daig2 with secondary diagnosis.
+
+```
+data <- data_ejemplo %>% AddDiagnosis2()
+head(data)
+``` 
+
+The function `AddDiagnosis3` add column daig3 with specific diagnosis.
+
+```
+data <- data_ejemplo %>% AddDiagnosis3()
+head(data)
+``` 
+
 The function `ReduceData` does different grouping manipulations by _provincia_, date, diagnosis or sex.
 
 ```
-data <- MorbiditySpain::ReduceData()
+data <- data_ejemplo %>% ReduceData(provincia = TRUE,date = "day")
 head(data)
 ```
 
 The function `SetPrevalence` gets relative values from grouped values and population (total or by sex) of provinces.
 
 ```
-data <-MorbiditySpain::SetPrevalence(pop = "total")
+data <- data_ejemplo %>%  ReduceData(provincia = TRUE,date="year") %>% SetPrevalence()
 head(data)
 ```
