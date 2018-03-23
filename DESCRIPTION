@@ -7,7 +7,7 @@ Authors@R: person("Rafael", "Menéndez", role = c("aut", "cre"),email = "spain.m
 Maintainer: Rafael Menéndez <spain.morbidity@gmail.com>
 Description: Show data from Encuesta de morbilidad hospitalaria
 License: GPL-2
-URL: https://github.com/rafaelmenmell/MorbiditySpainR
+URL: https://github.com/rOpenSpain/MorbiditySpainR
 Encoding: UTF-8
 LazyData: true
 Imports:
