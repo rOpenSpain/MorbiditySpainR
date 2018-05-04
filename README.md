@@ -1,5 +1,7 @@
 # MorbiditySpainR
 
+*ATENCIÓN* Recientemente se han añadido datos de los años 2015 y 2016 con formatos distintos, todavía no se actualizado el paquete para trabajar con estos datos.
+
 [![Build Status](https://api.travis-ci.org/rOpenSpain/MorbiditySpainR.svg?branch=master)](https://travis-ci.org/rOpenSpain/MorbiditySpainR)
 
 R package to read, parse and do basic manipulation of INE Morbidity microdata [Morbilidad Hospitalaria Microdatos INE](http://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&secc=1254736195291&idp=1254735573175). 
