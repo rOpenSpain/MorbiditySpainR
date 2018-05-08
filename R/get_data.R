@@ -53,7 +53,7 @@ ReadZip2015 <- function(year){
   download.file(filezip,temp)
   fileu <- unzip(temp,list=TRUE)$Name
   file1 <- fileu[grepl("MD",fileu)]
-  unzip(zipfile = temp,files = file1,exdir = "temp",junkpaths = TRUE)
+  unzip(zipfile = temp,files = file1,exdir = ".",junkpaths = TRUE)
   file2 <- fileu[grepl("md_EMH",fileu)]
   unzip(zipfile = temp,files = file2,exdir = "temp",junkpaths = TRUE)
   unlink(temp)
@@ -75,7 +75,9 @@ ReadZip2015 <- function(year){
 
 source_lines <- function(file, lines){
   # https://gist.github.com/christophergandrud/1eb4e095974204b12af9
-  source(textConnection(readLines(file,encoding = "UTF-8")[lines]))
+  code <- readLines(file)[lines]
+  code <- gsub(pattern = "\xf3",replacement = "o",x = code)
+  source(textConnection(code))
 }
 
 #' @title Download and read morbidity data for several years
