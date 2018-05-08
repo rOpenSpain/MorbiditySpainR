@@ -13,9 +13,6 @@ ReadZip <- function(year){
   temp <- tempfile()
   download.file(filezip,temp)
   fileu <- unzip(temp,list=TRUE)$Name
-  if (year>=2016){
-    fileu <- fileu[grepl(glob2rx("md*txt"),fileu)]
-  }
   unzip(temp)
   unlink(temp)
   #data <- read.fwf(fileu,widths = c(8,2,1,2,1,6,4,1,3,2,2,6,8,8),colClasses=rep("character",14))
