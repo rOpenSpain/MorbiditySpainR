@@ -79,9 +79,9 @@ ReadZip2015 <- function(year){
   fileR <- list.files(path = ".",pattern = "MD_EMH",full.names = FALSE)
   #################codigo INE#############################
   #Lectura del fichero de metadatos (METAD), Hoja "Dise?o" de archivo .xlsx
-  tryCatch((workBook <- loadWorkbook(fichero_meta)), error=function(e) 
+  tryCatch((workBook <- XLConnect::loadWorkbook(fichero_meta)), error=function(e) 
     stop(paste("Error. No se puede abrir el fichero: ", e, fichero_meta,". Saliendo de la ejecucion...", sep = "")))
-  df <- readNamedRegion(workBook, name = "METADATOS")
+  df <- XLConnect:readNamedRegion(workBook, name = "METADATOS")
   
   nombresVarbls <- df[,1]
   nombresTablas <- df[,2]
