@@ -21,7 +21,7 @@ ReadZip <- function(year){
   } else {
     data <- ReadZip2015(year)
     if (year==2016){
-      data$elevacion <- NA
+      stop("Todavia no está disponible para 2016")
     }
   }
   #data <- read.fwf(fileu,widths = c(8,2,1,2,1,6,4,1,3,2,2,6,8,8),colClasses=rep("character",14))
@@ -145,6 +145,9 @@ ReadZip2015 <- function(year){
 #' data <- GetMorbiData(y1=2010,y2=2011)
 
 GetMorbiData <- function(y1=2005,y2=2015){
+  if(y1==2016 | y2==2016){
+    stop("Todavia no está disponible para 2016")
+  }
   ys <- y1:y2
   data.m <- vector("list",length(ys))
   n <- 1

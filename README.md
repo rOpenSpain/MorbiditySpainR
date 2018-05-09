@@ -1,6 +1,6 @@
 # MorbiditySpainR
 
-*ATENCIÓN* Recientemente se han añadido datos de los años 2015 y 2016 con formatos distintos, todavía no se actualizado el paquete para trabajar con estos datos.
+*ATENCIÓN* Recientemente se han añadido datos de los años 2015 y 2016 con formatos distintos, todavía no se actualizado el paquete para trabajar con los datos del 2016 ya que la codificación de diagnótico a cambiado al CIE-10.
 
 [![Build Status](https://api.travis-ci.org/rOpenSpain/MorbiditySpainR.svg?branch=master)](https://travis-ci.org/rOpenSpain/MorbiditySpainR)
 
