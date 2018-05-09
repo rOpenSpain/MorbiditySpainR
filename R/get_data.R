@@ -9,14 +9,19 @@
 ReadZip <- function(year){
   #descomprime
   #filezip <- sprintf("https://github.com/rafaelmenmell/MorbiditySpain/raw/master/data/datos_morbi%s.zip",substr(year,3,4))
-  filezip <- sprintf("ftp://www.ine.es/temas/morbihos/datos_%s.zip",year,3,4)
-  temp <- tempfile()
-  download.file(filezip,temp)
-  fileu <- unzip(temp,list=TRUE)$Name
-  unzip(temp)
-  unlink(temp)
+  if (year<2015){
+    filezip <- sprintf("ftp://www.ine.es/temas/morbihos/datos_%s.zip",year,3,4)
+    temp <- tempfile()
+    download.file(filezip,temp)
+    fileu <- unzip(temp,list=TRUE)$Name
+    unzip(temp)
+    unlink(temp)
+    data <- read_fwf(fileu,fwf_widths(c(8,2,1,2,1,6,4,1,3,2,2,6,8,8)))
+    unlink(fileu)
+  } else {
+    data <- ReadZip2015(year)
+  }
   #data <- read.fwf(fileu,widths = c(8,2,1,2,1,6,4,1,3,2,2,6,8,8),colClasses=rep("character",14))
-  data <- read_fwf(fileu,fwf_widths(c(8,2,1,2,1,6,4,1,3,2,2,6,8,8)))
   colnames(data) <- c("numero","prov_hosp","sexo","prov_res","diag_in","fecha_alta","diag_ppal","motivo_alta","edad_anyos","edad_meses","edad_dias","estancia","elevacion","filler")
   #vamos a hacer unos cast para reducir el tamaño del data frame
   data$numero <- as.integer(data$numero)
@@ -38,8 +43,56 @@ ReadZip <- function(year){
   data$elevacion <- NULL
   data$numero <- NULL
   data$fecha_alta <- NULL
-  unlink(fileu)
+  
   return(data)
+}
+
+#' @title Download and read morbidity data form year 2015
+#' @description Download morbidity data from INE ftp and parse it
+#' @param year Year of morbidity data
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
+#' @details Uses script provided from INE
+#' @examples
+#' data <- ReadZip(2015)
+
+ReadZip2015 <- function(year){
+  filezip <- sprintf("ftp://www.ine.es/temas/morbihos/datos_%s.zip",year,3,4)
+  temp <- tempfile()
+  download.file(filezip,temp)
+  fileu <- unzip(temp,list=TRUE)$Name
+  file1 <- fileu[grepl("MD",fileu)]
+  unzip(zipfile = temp,files = file1,exdir = ".",junkpaths = TRUE)
+  file2 <- fileu[grepl("md_EMH",fileu)]
+  unzip(zipfile = temp,files = file2,exdir = "temp",junkpaths = TRUE)
+  unlink(temp)
+  filezip <- sprintf("ftp://www.ine.es/temas/morbihos/disreg_morbi%s.zip",year,3,4)
+  temp <- tempfile()
+  download.file(filezip,temp)
+  fileu <- unzip(temp,list=TRUE)$Name
+  unzip(zipfile = temp,files = fileu,exdir = "temp",junkpaths = TRUE)
+  unlink(temp)
+  fileR <- list.files(path = ".",pattern = "MD_EMH",full.names = FALSE)
+  source_lines(file = fileR,1:33)
+  fichero_micro <- list.files(path = "temp/",pattern = ".txt",full.names = TRUE)
+  fichero_meta  <- list.files(path = "temp/",pattern = ".xlsx",full.names = TRUE)
+  source_lines(file = fileR,44:120)
+  unlink(fileR)
+  unlink("temp/",recursive = TRUE)
+  fichero_salida$DiagEntr <- as.integer(fichero_salida$DiagEntr)
+  return(fichero_salida)
+}
+
+#' @title Auxiliary function to source code
+#' @description Source INE code, just the lines to maki it work
+#' @param year source file and lines
+#' @return execution of code
+#' @details Uses script provided from INE
+
+source_lines <- function(file, lines){
+  # https://gist.github.com/christophergandrud/1eb4e095974204b12af9
+  code <- readLines(file)[lines]
+  code <- gsub(pattern = "\xf3",replacement = "o",x = code)
+  source(textConnection(code))
 }
 
 #' @title Download and read morbidity data for several years
