@@ -81,7 +81,7 @@ ReadZip2015 <- function(year){
   #Lectura del fichero de metadatos (METAD), Hoja "Dise?o" de archivo .xlsx
   tryCatch((workBook <- XLConnect::loadWorkbook(fichero_meta)), error=function(e) 
     stop(paste("Error. No se puede abrir el fichero: ", e, fichero_meta,". Saliendo de la ejecucion...", sep = "")))
-  df <- XLConnect:readNamedRegion(workBook, name = "METADATOS")
+  df <- XLConnect::readNamedRegion(workBook, name = "METADATOS")
   
   nombresVarbls <- df[,1]
   nombresTablas <- df[,2]
