@@ -67,13 +67,11 @@ ReadZip2015 <- function(year){
   unzip(zipfile = temp,files = file1,exdir = ".",junkpaths = TRUE)
   file2 <- fileu[grepl("md_EMH",fileu)]
   unzip(zipfile = temp,files = file2,exdir = ".",junkpaths = TRUE)
-  unlink(temp)
   filezip <- sprintf("ftp://www.ine.es/temas/morbihos/disreg_morbi%s.zip",year,3,4)
-  temp <- tempfile()
-  download.file(filezip,temp)
-  fileu <- unzip(temp,list=TRUE)$Name
-  unzip(zipfile = temp,files = fileu,exdir = ".",junkpaths = TRUE)
-  unlink(temp)
+  temp2 <- tempfile()
+  download.file(filezip,temp2)
+  fileu <- unzip(temp2,list=TRUE)$Name
+  unzip(zipfile = temp2,files = fileu,exdir = ".",junkpaths = TRUE)
   fichero_meta  <- list.files(path = ".",pattern = ".xlsx",full.names = FALSE)
   fichero_micro <- list.files(path = ".",pattern = ".txt",full.names = FALSE)
   fileR <- list.files(path = ".",pattern = "MD_EMH",full.names = FALSE)
@@ -127,7 +125,8 @@ ReadZip2015 <- function(year){
   rm(flag_num,workBook,nombresVarbls,nombresTablas,posiciones,tamanio,df,df1)
   if(length(df) == 4){rm(tipDatos)}
   #########################################################
-  
+  unlink(temp)
+  unlink(temp2)
   unlink(fileR)
   unlink(fichero_micro)
   unlink(fichero_meta)
