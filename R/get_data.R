@@ -20,6 +20,9 @@ ReadZip <- function(year){
     unlink(fileu)
   } else {
     data <- ReadZip2015(year)
+    if (year==2016){
+      data$elevacion <- NA
+    }
   }
   #data <- read.fwf(fileu,widths = c(8,2,1,2,1,6,4,1,3,2,2,6,8,8),colClasses=rep("character",14))
   colnames(data) <- c("numero","prov_hosp","sexo","prov_res","diag_in","fecha_alta","diag_ppal","motivo_alta","edad_anyos","edad_meses","edad_dias","estancia","elevacion","filler")
@@ -63,37 +66,75 @@ ReadZip2015 <- function(year){
   file1 <- fileu[grepl("MD",fileu)]
   unzip(zipfile = temp,files = file1,exdir = ".",junkpaths = TRUE)
   file2 <- fileu[grepl("md_EMH",fileu)]
-  unzip(zipfile = temp,files = file2,exdir = "temp",junkpaths = TRUE)
+  unzip(zipfile = temp,files = file2,exdir = ".",junkpaths = TRUE)
   unlink(temp)
   filezip <- sprintf("ftp://www.ine.es/temas/morbihos/disreg_morbi%s.zip",year,3,4)
   temp <- tempfile()
   download.file(filezip,temp)
   fileu <- unzip(temp,list=TRUE)$Name
-  unzip(zipfile = temp,files = fileu,exdir = "temp",junkpaths = TRUE)
+  unzip(zipfile = temp,files = fileu,exdir = ".",junkpaths = TRUE)
   unlink(temp)
+  fichero_meta  <- list.files(path = ".",pattern = ".xlsx",full.names = FALSE)
+  fichero_micro <- list.files(path = ".",pattern = ".txt",full.names = FALSE)
   fileR <- list.files(path = ".",pattern = "MD_EMH",full.names = FALSE)
-  source_lines(file = fileR,1:33)
-  fichero_micro <- list.files(path = "temp/",pattern = ".txt",full.names = TRUE)
-  fichero_meta  <- list.files(path = "temp/",pattern = ".xlsx",full.names = TRUE)
-  source_lines(file = fileR,44:120)
+  #################codigo INE#############################
+  #Lectura del fichero de metadatos (METAD), Hoja "Dise?o" de archivo .xlsx
+  tryCatch((workBook <- loadWorkbook(fichero_meta)), error=function(e) 
+    stop(paste("Error. No se puede abrir el fichero: ", e, fichero_meta,". Saliendo de la ejecucion...", sep = "")))
+  df <- readNamedRegion(workBook, name = "METADATOS")
+  
+  nombresVarbls <- df[,1]
+  nombresTablas <- df[,2]
+  posiciones    <- df[,3]
+  tipo          <- df[,4]
+  tamanio       <- length(nombresVarbls)
+  
+  # Lectura del fichero de microdatos (MICROD)
+  if(length(df) == 4){
+    cat("Sin formato")
+    
+    #Capturamos las columnas con su tipo de dato
+    tipDatos <- as.vector(sapply(df[,4], function(x){
+      if(identical(x, "A"))
+        "character"
+      else{
+        if(identical(x, "N"))
+          "numeric"
+      }
+    }
+    )
+    )
+    # Lectura del fichero de microdatos (MICROD), decimales con punto en MD  
+    tryCatch((df1 <- read.fwf(file = fichero_micro, widths= posiciones, colClasses=tipDatos)), error=function(e)
+      stop(paste("Error. No se encuentra el fichero: ", e, fichero_micro,". Saliendo de la ejecucion...", sep = "")))
+    
+  }else{
+    formatos <- df[,5]  
+    cat("Con formato")
+    
+    # Lectura del fichero de microdatos (MICROD), decimales sin punto en MD
+    tryCatch((df1 <- read.fortran(file = fichero_micro, format= formatos)), error=function(e)
+      stop(paste("Error. No se encuentra el fichero: ", e, fichero_micro,". Saliendo de la ejecucion...", sep = "")))
+  }
+  
+  #Aplicamos los nombres de la cabecera del registro
+  names(df1) <- df[,1]
+  fichero_salida <- df1
+  
+  
+  #Liberacion de memoria y aclaraci?n de variables 
+  #Values
+  rm(flag_num,workBook,nombresVarbls,nombresTablas,posiciones,tamanio,df,df1)
+  if(length(df) == 4){rm(tipDatos)}
+  #########################################################
+  
   unlink(fileR)
-  unlink("temp/",recursive = TRUE)
+  unlink(fichero_micro)
+  unlink(fichero_meta)
   fichero_salida$DiagEntr <- as.integer(fichero_salida$DiagEntr)
   return(fichero_salida)
 }
 
-#' @title Auxiliary function to source code
-#' @description Source INE code, just the lines to maki it work
-#' @param year source file and lines
-#' @return execution of code
-#' @details Uses script provided from INE
-
-source_lines <- function(file, lines){
-  # https://gist.github.com/christophergandrud/1eb4e095974204b12af9
-  code <- readLines(file)[lines]
-  code <- gsub(pattern = "\xf3",replacement = "o",x = code)
-  source(textConnection(code))
-}
 
 #' @title Download and read morbidity data for several years
 #' @description Download morbidity data from INE ftp and parse it

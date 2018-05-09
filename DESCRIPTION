@@ -16,6 +16,7 @@ Imports:
     ggplot2,
     seasonal,
     dplyr,
-    lubridate
+    lubridate,
+    XLConnect
 RoxygenNote: 6.0.1
 Suggests: testthat
