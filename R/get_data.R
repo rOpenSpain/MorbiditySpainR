@@ -73,7 +73,7 @@ ReadZip2015 <- function(year){
   fileu <- unzip(temp2,list=TRUE)$Name
   unzip(zipfile = temp2,files = fileu,exdir = ".",junkpaths = TRUE)
   fichero_meta  <- list.files(path = ".",pattern = ".xlsx",full.names = FALSE)
-  fichero_micro <- list.files(path = ".",pattern = ".txt",full.names = FALSE)
+  fichero_micro <- list.files(path = ".", pattern = glob2rx("md*.txt"),full.names = FALSE)
   fileR <- list.files(path = ".",pattern = "MD_EMH",full.names = FALSE)
   #################codigo INE#############################
   #Lectura del fichero de metadatos (METAD), Hoja "Dise?o" de archivo .xlsx
