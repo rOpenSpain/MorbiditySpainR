@@ -47,6 +47,14 @@ ReadZip <- function(year){
   return(data)
 }
 
+#' @title Download and read morbidity data form year 2015
+#' @description Download morbidity data from INE ftp and parse it
+#' @param year Year of morbidity data
+#' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad
+#' @details Uses script provided from INE
+#' @examples
+#' data <- ReadZip(2015)
+
 ReadZip2015 <- function(year){
   filezip <- sprintf("ftp://www.ine.es/temas/morbihos/datos_%s.zip",year,3,4)
   temp <- tempfile()
@@ -70,8 +78,15 @@ ReadZip2015 <- function(year){
   source_lines(file = fileR,44:120)
   unlink(fileR)
   unlink("temp/",recursive = TRUE)
+  fichero_salida$DiagEntr <- as.integer(fichero_salida$DiagEntr)
   return(fichero_salida)
 }
+
+#' @title Auxiliary function to source code
+#' @description Source INE code, just the lines to maki it work
+#' @param year source file and lines
+#' @return execution of code
+#' @details Uses script provided from INE
 
 source_lines <- function(file, lines){
   # https://gist.github.com/christophergandrud/1eb4e095974204b12af9
