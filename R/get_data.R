@@ -18,14 +18,18 @@ ReadZip <- function(year){
     unlink(temp)
     data <- read_fwf(fileu,fwf_widths(c(8,2,1,2,1,6,4,1,3,2,2,6,8,8)))
     unlink(fileu)
+    data$cie <- 9
   } else {
     data <- ReadZip2015(year)
     if (year==2016){
-      stop("Todavia no está disponible para 2016")
+      data$cie <- 10
+      data$elevacion <- NA
+    } else {
+      data$cie <- 9
     }
   }
   #data <- read.fwf(fileu,widths = c(8,2,1,2,1,6,4,1,3,2,2,6,8,8),colClasses=rep("character",14))
-  colnames(data) <- c("numero","prov_hosp","sexo","prov_res","diag_in","fecha_alta","diag_ppal","motivo_alta","edad_anyos","edad_meses","edad_dias","estancia","elevacion","filler")
+  colnames(data) <- c("numero","prov_hosp","sexo","prov_res","diag_in","fecha_alta","diag_ppal","motivo_alta","edad_anyos","edad_meses","edad_dias","estancia","elevacion","filler","cie")
   #vamos a hacer unos cast para reducir el tamaño del data frame
   data$numero <- as.integer(data$numero)
   data$prov_hosp <- as.integer(data$prov_hosp)
@@ -145,9 +149,6 @@ ReadZip2015 <- function(year){
 #' data <- GetMorbiData(y1=2010,y2=2011)
 
 GetMorbiData <- function(y1=2005,y2=2015){
-  if(y1==2016 | y2==2016){
-    stop("Todavia no está disponible para 2016")
-  }
   ys <- y1:y2
   data.m <- vector("list",length(ys))
   n <- 1
@@ -246,15 +247,31 @@ FilterDiagnosis2 <- function(data,diagnosis_id){
 #' data <- data_ejemplo %>% AddDiagnosis1()
 
 AddDiagnosis1 <- function(data){
+  cies <- unique(data$cie)
   data$diag1 <- NA
-  for (i in 1:nrow(diag1)){
-    message(sprintf("%s de %s\r",i,nrow(diag1)),appendLF = FALSE)
-    start <- diag1[i,]$start
-    end <- diag1[i,]$end
-    id <- diag1[i,]$id
-    data$temp <- as.numeric(substr(gsub("V","",data$diag_ppal),1,3))
-    if(nrow(data[data$temp>=start & data$temp<=end,])>0){
-      data[data$temp>=start & data$temp<=end,]$diag1 <- id
+  if (9 %in% cies){
+    for (i in 1:nrow(diag1)){
+      message(sprintf("%s de %s\r",i,nrow(diag1)),appendLF = FALSE)
+      start <- diag1[i,]$start
+      end <- diag1[i,]$end
+      id <- diag1[i,]$id
+      data$temp <- as.numeric(substr(gsub("V","",data$diag_ppal),1,3))
+      if(nrow(data[data$temp>=start & data$temp<=end,])>0){
+        data[data$temp>=start & data$temp<=end & data$cie==9,]$diag1 <- id
+      }
+    }
+  }
+  if (10 %in% cies){
+    for (i in 1:nrow(diag1_v10)){
+      message(sprintf("%s de %s\r",i,nrow(diag1_v10)),appendLF = FALSE)
+      letra <- diag1_v10[i,]$letra
+      start <- diag1_v10[i,]$start
+      end <- diag1_v10[i,]$end
+      id <- diag1_v10[i,]$id
+      select <- which(substr(data$diag_ppal,1,1)==letra & as.numeric(substr(data$diag_ppal,2,3)) %in% start::end)
+      if(length(select)>0){
+        data[select,]$diag1 <- id
+      }
     }
   }
   data <- data %>% dplyr::select(-temp)
@@ -310,6 +327,20 @@ TraduceCodigoEspecifico <- function(codigo){
   info <- strsplit(info,codigo)[[1]][2]
   info <- gsub("</div>","",info)
   return(info)
+}
+
+#' @title Translate CIE-10 code to CIE-9
+#' @description Get approximate CIE-9 code from CIE-10
+#' @param codigo code from morbidity data cie 10 version
+#' @return code from morbidity data cie 9 version
+#' @examples
+#' data <- TraduceCodigoEspecifico("S72109D")
+
+TraduceCIE10toCIE9 <- function(codigo){
+  codigo <- sprintf("%s.%s",substr(codigo,1,3),substr(codigo,4,nchar(codigo)))
+  url <- sprintf("http://www.icd10data.com/Convert/%s",codigo)
+  info <- readLines(url)
+  #ahora hay que buscar el codigo del CIE9
 }
 
 #' @title Add specific diagnosis to morbity data
