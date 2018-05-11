@@ -22,8 +22,8 @@ ReadZip <- function(year){
   } else {
     data <- ReadZip2015(year)
     if (year==2016){
+      data$filler <- NA
       data$cie <- 10
-      data$elevacion <- NA
     } else {
       data$cie <- 9
     }
@@ -35,13 +35,17 @@ ReadZip <- function(year){
   data$prov_hosp <- as.integer(data$prov_hosp)
   data$sexo <- as.integer(data$sexo)
   data$prov_res <- as.integer(data$prov_res)
-  data$fecha_alta <- ISOdate(year=as.integer(substr(data$fecha_alta,1,2))+trunc(year/100)*100,month = as.integer(substr(data$fecha_alta,3,4)),day = as.integer(substr(data$fecha_alta,5,6)))
+  if (year!=2016){
+    data$fecha_alta <- ISOdate(year=as.integer(substr(data$fecha_alta,1,2))+trunc(year/100)*100,month = as.integer(substr(data$fecha_alta,3,4)),day = as.integer(substr(data$fecha_alta,5,6)))
+  } else {
+    data$fecha_alta <- as.Date(data$fecha_alta,format="%d%m%Y")
+  }
   data$motivo_alta <- as.integer(data$motivo_alta)
   data$edad_anyos <- as.integer(data$edad_anyos)
   data$edad_meses <- as.integer(data$edad_meses)
   data$edad_dias <- as.integer(data$edad_dias)
   data$estancia <- as.integer(data$estancia)
-  data$fecha_ingreso <- as.Date(data$fecha_alta-data$estancia*24*60*60)
+  data$fecha_ingreso <- data$fecha_alta-days(data$estancia)
   data$edad <- as.integer(round(data$edad_anyos+data$edad_meses/12+data$edad_dias/365))
   data$edad_anyos <- NULL
   data$edad_meses <- NULL
@@ -260,6 +264,7 @@ AddDiagnosis1 <- function(data){
         data[data$temp>=start & data$temp<=end & data$cie==9,]$diag1 <- id
       }
     }
+    data <- data %>% dplyr::select(-temp)
   }
   if (10 %in% cies){
     for (i in 1:nrow(diag1_v10)){
@@ -268,13 +273,13 @@ AddDiagnosis1 <- function(data){
       start <- diag1_v10[i,]$start
       end <- diag1_v10[i,]$end
       id <- diag1_v10[i,]$id
-      select <- which(substr(data$diag_ppal,1,1)==letra & as.numeric(substr(data$diag_ppal,2,3)) %in% start::end)
+      select <- which(substr(data$diag_ppal,1,1)==letra & as.numeric(substr(data$diag_ppal,2,3)) %in% start:end)
       if(length(select)>0){
         data[select,]$diag1 <- id
       }
     }
   }
-  data <- data %>% dplyr::select(-temp)
+  
   return(data)
 }
 
@@ -340,6 +345,8 @@ TraduceCIE10toCIE9 <- function(codigo){
   codigo <- sprintf("%s.%s",substr(codigo,1,3),substr(codigo,4,nchar(codigo)))
   url <- sprintf("http://www.icd10data.com/Convert/%s",codigo)
   info <- readLines(url)
+  info <- info[grepl("identifier",info)]
+  
   #ahora hay que buscar el codigo del CIE9
 }
 
