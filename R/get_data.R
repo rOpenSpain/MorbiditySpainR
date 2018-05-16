@@ -159,6 +159,7 @@ GetMorbiData <- function(y1=2005,y2=2015){
   for (y in ys){
     #print(y)
     data.m[[n]] <- suppressMessages(ReadZip(y))
+    data.m[[n]]$fecha_ingreso <- as.Date(data.m[[n]]$fecha_ingreso)
     n <- n+1
   }
   data.m <- dplyr::bind_rows(data.m)
@@ -346,8 +347,30 @@ TraduceCIE10toCIE9 <- function(codigo){
   url <- sprintf("http://www.icd10data.com/Convert/%s",codigo)
   info <- readLines(url)
   info <- info[grepl("identifier",info)]
+  codigo9 <- gsub(pattern = '.*identifier\">(.*)</span></a>.*',replacement = '\\1',info)
+  codigo9 <- gsub(pattern = '\\.',replacement = "",codigo9)
+  if (identical(codigo9,character(0))!=TRUE){
+    if (nchar(codigo9)>4){
+      codigo9 <- substr(codigo9,1,4)
+      return(codigo9)
+    } else {
+      return(codigo9)
+    }
+  } else {
+    codigo <- sprintf("%s0",codigo)
+    url <- sprintf("http://www.icd10data.com/Convert/%s",codigo)
+    info <- readLines(url)
+    info <- info[grepl("identifier",info)]
+    codigo9 <- gsub(pattern = '.*identifier\">(.*)</span></a>.*',replacement = '\\1',info)
+    codigo9 <- gsub(pattern = '\\.',replacement = "",codigo9)
+    if (nchar(codigo9)>4){
+      codigo9 <- substr(codigo9,1,4)
+      return(codigo9)
+    } else {
+      return(codigo9)
+    }
+  }
   
-  #ahora hay que buscar el codigo del CIE9
 }
 
 #' @title Add specific diagnosis to morbity data
@@ -358,14 +381,31 @@ TraduceCIE10toCIE9 <- function(codigo){
 #' data <- data_ejemplo %>% AddDiagnosis3()
 
 AddDiagnosis3 <- function(data){
-  codes <- unique(data$diag_ppal)
+  cies <- unique(data$cie)
+  # codes <- unique(data$diag_ppal)
   data$diag3 <- NA
-  for (code in codes){
-    i <- 1
-    message(sprintf("%s de %s\r",i,length(codes)),appendLF = FALSE)
-    diag3 <- TraduceCodigoEspecifico(code)
-    data[data$diag_ppal==code,]$diag3 <- diag3
-    i <- i + 1
+  i <- 1
+  if (9 %in% cies){
+    codes9 <- unique(data[data$cie==9,]$diag_ppal)
+    for (code in codes9){
+      
+      message(sprintf("%s de %s\r",i,length(codes9)),appendLF = FALSE)
+      diag3 <- TraduceCodigoEspecifico(code)
+      data[data$cie==9 & data$diag_ppal==code,]$diag3 <- diag3
+      i <- i + 1
+    }
+  }
+  i <- 1
+  if (10 %in% cies){
+    codes10 <- unique(data[data$cie==10,]$diag_ppal)
+    for (code in codes10){
+      print(code)
+      message(sprintf("%s de %s\r",i,length(codes10)),appendLF = FALSE)
+      diag3 <- TraduceCIE10toCIE9(code)
+      diag3 <- TraduceCodigoEspecifico(diag3)
+      data[data$cie==10 & data$diag_ppal==code,]$diag3 <- diag3
+      i <- i + 1
+    }
   }
   return(data)
 }
