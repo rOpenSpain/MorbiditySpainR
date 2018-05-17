@@ -322,17 +322,21 @@ AddDiagnosis2 <- function(data){
 #' data <- TraduceCodigoEspecifico(3019)
 
 TraduceCodigoEspecifico <- function(codigo){
-  if (nchar(codigo)==4){
-    if (grepl("V",codigo)==FALSE){
-      codigo <- paste(substr(codigo, 1, 3), ".", substr(codigo, 4, 4), sep = "")
+  if (is.na(codigo)==FALSE){
+    if (nchar(codigo)==4){
+      if (grepl("V",codigo)==FALSE){
+        codigo <- paste(substr(codigo, 1, 3), ".", substr(codigo, 4, 4), sep = "")
+      }
     }
+    url <- sprintf("http://icd9cm.chrisendres.com/index.php?srchtype=diseases&srchtext=%s&Submit=Search&action=search",codigo)
+    info <- readLines(url)
+    info <- info[grepl(codigo,info)][2]
+    info <- strsplit(info,codigo)[[1]][2]
+    info <- gsub("</div>","",info)
+    return(info)
+  } else {
+    return(NA)
   }
-  url <- sprintf("http://icd9cm.chrisendres.com/index.php?srchtype=diseases&srchtext=%s&Submit=Search&action=search",codigo)
-  info <- readLines(url)
-  info <- info[grepl(codigo,info)][2]
-  info <- strsplit(info,codigo)[[1]][2]
-  info <- gsub("</div>","",info)
-  return(info)
 }
 
 #' @title Translate CIE-10 code to CIE-9
@@ -343,7 +347,13 @@ TraduceCodigoEspecifico <- function(codigo){
 #' data <- TraduceCodigoEspecifico("S72109D")
 
 TraduceCIE10toCIE9 <- function(codigo){
-  codigo <- sprintf("%s.%s",substr(codigo,1,3),substr(codigo,4,nchar(codigo)))
+  codigo <- gsub(" ","",codigo)
+  if (grepl(pattern = "[A-Z]",x = codigo)==FALSE){
+    return(NA)
+  }
+  if (nchar(codigo)>=4){
+    codigo <- sprintf("%s.%s",substr(codigo,1,3),substr(codigo,4,nchar(codigo)))
+  }
   url <- sprintf("http://www.icd10data.com/Convert/%s",codigo)
   info <- readLines(url)
   info <- info[grepl("identifier",info)]
@@ -357,17 +367,36 @@ TraduceCIE10toCIE9 <- function(codigo){
       return(codigo9)
     }
   } else {
-    codigo <- sprintf("%s0",codigo)
-    url <- sprintf("http://www.icd10data.com/Convert/%s",codigo)
+    codigo2 <- sprintf("%s0",codigo)
+    url <- sprintf("http://www.icd10data.com/Convert/%s",codigo2)
     info <- readLines(url)
     info <- info[grepl("identifier",info)]
     codigo9 <- gsub(pattern = '.*identifier\">(.*)</span></a>.*',replacement = '\\1',info)
     codigo9 <- gsub(pattern = '\\.',replacement = "",codigo9)
-    if (nchar(codigo9)>4){
-      codigo9 <- substr(codigo9,1,4)
-      return(codigo9)
+    if (identical(codigo9,character(0))!=TRUE){
+      if (nchar(codigo9)>4){
+        codigo9 <- substr(codigo9,1,4)
+        return(codigo9)
+      } else {
+        return(codigo9)
+      }
     } else {
-      return(codigo9)
+      codigo3 <- sprintf("%s1",codigo)
+      url <- sprintf("http://www.icd10data.com/Convert/%s",codigo3)
+      info <- readLines(url)
+      info <- info[grepl("identifier",info)]
+      codigo9 <- gsub(pattern = '.*identifier\">(.*)</span></a>.*',replacement = '\\1',info)
+      codigo9 <- gsub(pattern = '\\.',replacement = "",codigo9)
+      if (identical(codigo9,character(0))!=TRUE){
+        if (nchar(codigo9)>4){
+          codigo9 <- substr(codigo9,1,4)
+          return(codigo9)
+        } else {
+          return(codigo9)
+        }
+      } else {
+        return(NA)
+      }
     }
   }
   
