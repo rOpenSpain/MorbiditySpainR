@@ -287,12 +287,15 @@ AddDiagnosis1 <- function(data){
 #' @title Add secondary diagnosis to morbity data
 #' @description Add secondary diagnosis following international classification of diseases
 #' @param data Morbidity data
+#' @param exhaustivo When usig cie 10 you find codes with no direct translation to cie 9 this are codified as 999, if you want it to be trasnlate you shlud mark TRUE (very slow)
 #' @return data frame with morbidity data prov_hosp, sexo, prov_res, diag_in, diag_ppal, motivo_alta, estancia, fecha_ingreso, edad, diag2
 #' @examples
 #' data <- data_ejemplo %>% AddDiagnosis2()
 
-AddDiagnosis2 <- function(data){
+AddDiagnosis2 <- function(data,exhaustivo=TRUE){
+  cies <- unique(data$cie)
   data$diag2 <- NA
+  if (9 %in% cies){
   for (i in 1:nrow(diag2)){
     message(sprintf("%s de %s\r",i,nrow(diag2)),appendLF = FALSE)
     start <- as.numeric(gsub("V","",diag2[i,]$start))
@@ -311,6 +314,36 @@ AddDiagnosis2 <- function(data){
     }
   }
   data <- data %>% dplyr::select(-temp)
+  }
+  if (10 %in% cies){
+    for (i in 1:nrow(diag2_v10)){
+      message(sprintf("%s de %s\r",i,nrow(diag2_v10)),appendLF = FALSE)
+      letra <- diag2_v10[i,]$letra
+      start <- diag2_v10[i,]$inicio
+      end <- diag2_v10[i,]$fin
+      id <- diag2_v10[i,]$id9
+      select <- which(substr(data$diag_ppal,1,1)==letra & as.numeric(substr(data$diag_ppal,2,3)) %in% start:end)
+      if(length(select)>0){
+        data[select,]$diag2 <- id
+      }
+    }
+  }
+  if(exhaustivo){
+    data_999 <- data %>% dplyr::filter(diag2==999)
+    diags <- unique(data_999$diag_ppal)
+    data_999$cie <- 9
+    i <- 1
+    for (diag in diags){
+      message(sprintf("%s de %s\r",i,length(diags)),appendLF = FALSE)
+      diag_cie9 <- TraduceCIE10toCIE9(diag)
+      if(!is.na(diag_cie9)){
+        data_999[data_999$diag_ppal==diag,]$diag_ppal <- diag_cie9
+      }
+      i <- i+1
+    }
+    data_999 <- data_999 %>% AddDiagnosis2(exhaustivo = FALSE)
+    data[data$diag2==999,]$diag2 <- data_999$diag2
+  }
   return(data)
 }
 
