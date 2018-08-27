@@ -1,7 +1,5 @@
 # MorbiditySpainR
 
-*ATENCIÓN* Recientemente se han añadido datos de los años 2015 y 2016 con formatos distintos, todavía no se actualizado el paquete para trabajar con los datos del 2016 ya que la codificación de diagnótico a cambiado al CIE-10.
-
 [![Build Status](https://api.travis-ci.org/rOpenSpain/MorbiditySpainR.svg?branch=master)](https://travis-ci.org/rOpenSpain/MorbiditySpainR)
 
 R package to read, parse and do basic manipulation of INE Morbidity microdata [Morbilidad Hospitalaria Microdatos INE](http://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176778&menu=resultados&secc=1254736195291&idp=1254735573175). 
@@ -93,3 +91,5 @@ The function `SetPrevalence` gets relative values from grouped values and popula
 data <- data_ejemplo %>%  ReduceData(provincia = TRUE,date="year") %>% SetPrevalence()
 head(data)
 ```
+
+NOTE: installing rJava and rlang in mac can be tricky I followed [this](https://github.com/MTFA/CohortEx/wiki/Run-rJava-with-RStudio-under-OSX-10.10,-10.11-(El-Capitan)-or-10.12-(Sierra))
