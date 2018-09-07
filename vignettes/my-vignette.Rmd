@@ -43,8 +43,8 @@ dplyr::glimpse(data)
 ```
 
 Un interesante análisis exploratorio es saber la prevalencia de inregsos hospitalrios debidos a la ingesta de alcohol por parte de menores disgregada a nivel provincial
-
-```{r explo1, echo=FALSE, cache=TRUE, dependson=datos, eval=TRUE, message=FALSE, warning=FALSE}
+2
+```{r explo1, echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE}
 ll <- data %>% filter(year(fecha_ingreso)>=2010)
 
 ll2 <- ll %>% FilterEmergency() %>% filter(edad<18) %>% FilterDiagnosis2(35)
@@ -67,7 +67,7 @@ plot(g)
 
 Otro análisis exploratorio que nos permite hacer este conjunto de datos tiene como objetivo conocer cuales son los esguinces más comunes en las personas entre 30 y 45 años, separando los resultados por sexos.
 
-```{r explo2,  echo=FALSE, cache=TRUE, dependson=datos, eval=TRUE, message=FALSE, warning=FALSE}
+```{r explo2,  echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE}
 lesiones <- data %>% FilterEmergency() %>% filter(edad>=30 & edad<=45) %>% FilterDiagnosis2(96) %>% AddDiagnosis3()
 lesiones <- lesiones %>% ReduceData(provincia = TRUE,date = "day",diag = "diag3",sex=TRUE)
 
@@ -83,7 +83,7 @@ plot(g2)
 
 Otro análisis nos puedo servir para imitar a los famoso _myth buster_ y responder la pregunta de si las fases lunares tienen alguna relación con el número de partos.
 
-```{r explo3, echo=FALSE, cache=TRUE, dependson=datos, eval=TRUE, message=FALSE, warning=FALSE}
+```{r explo3, echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE}
 partos <- ll %>% FilterEmergency() %>% FilterDiagnosis2(77) %>%  ReduceData(provincia = FALSE,date = "day",sex = FALSE)
 library(lunar)
 partos$phase <- lunar.phase(partos$fecha,name=8)
