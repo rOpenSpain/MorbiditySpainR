@@ -1,10 +1,10 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "Casos de uso del paquete MorbiditySpainR"
+author: "Rafael Menéndez"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Casos de uso del paquete MorbiditySpainR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,6 +16,82 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Introducción
+
+Este documento trata de introducir el paquete MorbiditySpainR a través de casos de uso reales y sencillo. La meta, por lo tanto, es servir de motivación al uso del mismo. Para ello presentaremos algunos casos de exploración de los datos y finalmente esbozaremos algunos modelos predictivos.
+
+## Análisis exploratorio
+
+### Instalación del paquete
+
+```{r ins, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+devtools::install_github("rOpenSpain/MorbiditySpainR")
+library(MorbiditySpainR)
+library(lubridate)
+library(dplyr)
+library(ggplot2)
+library(geofacet)
+```
+
+### Descarga de los datos
+
+Para conseguir un conjunto de datos ligero pero suficiente para poder hacer análisis exploratorios atractivos vamos a descargar los datos de ingresos hospitalarios del quinquenio 2010 - 2014
+
+```{r datos, echo=FALSE, cache=TRUE, eval=TRUE, message=FALSE,warning=FALSE}
+data <- GetMorbiData(y1 = 2010,y2 = 2014)
+dplyr::glimpse(data)
+```
+
+Un interesante análisis exploratorio es saber la prevalencia de inregsos hospitalrios debidos a la ingesta de alcohol por parte de menores disgregada a nivel provincial
+
+```{r explo1, echo=FALSE, cache=TRUE, dependson=datos, eval=TRUE, message=FALSE, warning=FALSE}
+ll <- data %>% filter(year(fecha_ingreso)>=2010)
+
+ll2 <- ll %>% FilterEmergency() %>% filter(edad<18) %>% FilterDiagnosis2(35)
+ll2 <- ll2 %>% AddDiagnosis3() %>% ReduceData(provincia = TRUE,date = "year",diag = "diag3")
+diag2.35 <- unique(ll2$diag3)
+diag2.35 <- diag2.35[grepl("alcohol",tolower(diag2.35))]
+ll2 <- ll2 %>% filter(diag3 %in% diag2.35)
+ll2 <- ll2 %>% SetPrevalence()
+ll2 <- ll2 %>% dplyr::group_by(prov,fecha) %>% dplyr::summarise(total=sum(total.prev))
+ll2$code <- sprintf("%02d",ll2$prov)
+ll2$year <- year(ll2$fecha)
+prov.graf <- geofacet::spain_prov_grid1
+ll2 <- full_join(ll2,prov.graf,by="code")
+
+ll2.media <- mean(ll2$total,na.rm=TRUE)
+
+g <- ggplot(data=ll2) + geom_bar(aes(x=year,y=total),stat="identity",position="dodge") + geom_hline(yintercept = ll2.media,color="red") + facet_geo(~ name, grid = "spain_prov_grid1") +labs(title="Prevalencia de ingresos urgentes relacionados con alcohol en menores",subtitle="Casos por cada 100.000 habitantes",caption="Encuesta de morbilidad.2010-2014") + xlab("") + ylab("") + theme_bw() + theme(axis.text=element_text(size=6, angle=90))
+plot(g)
+```
+
+Otro análisis exploratorio que nos permite hacer este conjunto de datos tiene como objetivo conocer cuales son los esguinces más comunes en las personas entre 30 y 45 años, separando los resultados por sexos.
+
+```{r explo2,  echo=FALSE, cache=TRUE, dependson=datos, eval=TRUE, message=FALSE, warning=FALSE}
+lesiones <- data %>% FilterEmergency() %>% filter(edad>=30 & edad<=45) %>% FilterDiagnosis2(96) %>% AddDiagnosis3()
+lesiones <- lesiones %>% ReduceData(provincia = TRUE,date = "day",diag = "diag3",sex=TRUE)
+
+lesiones.y <- lesiones %>% group_by(diag=diag3,sex=sex) %>% summarise(total=sum(total))
+esguinces <- lesiones.y %>% group_by(diag) %>% summarise(tt=sum(total)) %>% top_n(10,tt)
+esguinces <- esguinces$diag
+lesiones.y <- lesiones.y %>% filter(diag %in% esguinces)
+lesiones.y$sex <- factor(x = lesiones.y$sex,labels = c("Hombre","Mujer"))
+
+g2 <- ggplot(data=lesiones.y) + geom_bar(aes(x=sex,y=total),stat="identity",position="dodge") + facet_wrap(~diag,nrow = 2,ncol = 5,scales = "free") + labs(title="Prevalencia de ingresos urgentes relacionados con esguinces divididos por sexo",subtitle="Casos totales",caption="Encuesta de morbilidad.2010-2014") + xlab("Sexo") + ylab("") + theme_bw()
+plot(g2)
+```
+
+Otro análisis nos puedo servir para imitar a los famoso _myth buster_ y responder la pregunta de si las fases lunares tienen alguna relación con el número de partos.
+
+```{r explo3, echo=FALSE, cache=TRUE, dependson=datos, eval=TRUE, message=FALSE, warning=FALSE}
+partos <- ll %>% FilterEmergency() %>% FilterDiagnosis2(77) %>%  ReduceData(provincia = FALSE,date = "day",sex = FALSE)
+library(lunar)
+partos$phase <- lunar.phase(partos$fecha,name=8)
+partos <- partos %>% group_by(phase) %>% summarise(total=sum(total))
+
+g3 <- ggplot(partos) + geom_bar(aes(x=phase,y=total),stat="identity",position = "dodge") + labs(title="Número de partos y fase lunar",subtitle="Casos totales",caption="Encuesta de morbilidad.2010-2015") + xlab("Fase Lunar") + ylab("") + theme_bw()
+plot(g3)
+```
 Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
 
 - Never uses retina figures
