@@ -2,11 +2,7 @@
 title: "Casos de uso del paquete MorbiditySpainR"
 author: "Rafael Menéndez"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Casos de uso del paquete MorbiditySpainR}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: rmarkdown::html_document
 ---
 
 ```{r setup, include = FALSE}
@@ -42,9 +38,11 @@ data <- GetMorbiData(y1 = 2010,y2 = 2014)
 dplyr::glimpse(data)
 ```
 
+### Ejemplos de análisis exploratorios
+
 Un interesante análisis exploratorio es saber la prevalencia de inregsos hospitalrios debidos a la ingesta de alcohol por parte de menores disgregada a nivel provincial
-2
-```{r explo1, echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE}
+
+```{r explo1, echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE,fig_width=10}
 ll <- data %>% filter(year(fecha_ingreso)>=2010)
 
 ll2 <- ll %>% FilterEmergency() %>% filter(edad<18) %>% FilterDiagnosis2(35)
@@ -67,7 +65,7 @@ plot(g)
 
 Otro análisis exploratorio que nos permite hacer este conjunto de datos tiene como objetivo conocer cuales son los esguinces más comunes en las personas entre 30 y 45 años, separando los resultados por sexos.
 
-```{r explo2,  echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE}
+```{r explo2,  echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE,fig_width=10}
 lesiones <- data %>% FilterEmergency() %>% filter(edad>=30 & edad<=45) %>% FilterDiagnosis2(96) %>% AddDiagnosis3()
 lesiones <- lesiones %>% ReduceData(provincia = TRUE,date = "day",diag = "diag3",sex=TRUE)
 
@@ -81,9 +79,9 @@ g2 <- ggplot(data=lesiones.y) + geom_bar(aes(x=sex,y=total),stat="identity",posi
 plot(g2)
 ```
 
-Otro análisis nos puedo servir para imitar a los famoso _myth buster_ y responder la pregunta de si las fases lunares tienen alguna relación con el número de partos.
+Otro análisis nos puedo servir para imitar a los famosos _myth buster_ y responder la pregunta de si las fases lunares tienen alguna relación con el número de partos.
 
-```{r explo3, echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE}
+```{r explo3, echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE,fig_width=10}
 partos <- ll %>% FilterEmergency() %>% FilterDiagnosis2(77) %>%  ReduceData(provincia = FALSE,date = "day",sex = FALSE)
 library(lunar)
 partos$phase <- lunar.phase(partos$fecha,name=8)
@@ -92,50 +90,24 @@ partos <- partos %>% group_by(phase) %>% summarise(total=sum(total))
 g3 <- ggplot(partos) + geom_bar(aes(x=phase,y=total),stat="identity",position = "dodge") + labs(title="Número de partos y fase lunar",subtitle="Casos totales",caption="Encuesta de morbilidad.2010-2015") + xlab("Fase Lunar") + ylab("") + theme_bw()
 plot(g3)
 ```
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+Un último ejemplo de análisis exploratorio nos puede servir para construir una serie temporal de los ingresos hospitalarios de menores por enfermedades respiratorias (gripe y neumonía) en la Comunidad de Madrid y confrontarla con una serie climatológica para poder señalar episodios epidemiológicos.
 
-## Vignette Info
+```{r explo4, echo=FALSE, cache=TRUE, dependson="datos", eval=TRUE, message=FALSE, warning=FALSE,fig_width=10}
+library(zoo)
+ll.gripe <- data %>% FilterProvincia(28) %>% FilterEmergency() %>% dplyr::filter(edad<18) %>% FilterDiagnosis2(57) %>% ReduceData(provincia = TRUE,date="day",sex = FALSE) %>% SetPrevalence(pop = "total")
+ll.gripe$yday <- yday(ll.gripe$fecha)
+ll.gripe.clim <- ll.gripe %>% dplyr::group_by(yday) %>% dplyr::summarise(mean=mean(total.prev,na.rm=TRUE))
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+ll.gripe.rollmean <- bind_rows(ll.gripe.clim,ll.gripe.clim,ll.gripe.clim)
+ll.gripe.rollmean <- rollmean(ll.gripe.rollmean$mean,15,fill=NA)[367:732]
+ll.gripe.clim$mean <- ll.gripe.rollmean
 
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+# g4 <- ggplot(ll.gripe.clim) + geom_line(aes(x=yday,y=mean))
+ll.gripe <- full_join(ll.gripe,ll.gripe.clim,by="yday")
+ll.gripe$color <- ifelse(test = ll.gripe$total.prev>ll.gripe$mean,"si","no")
+cols <- c("no" = "gray70", "si" = "red")
+ll.gripe <- ll.gripe %>% dplyr::filter(year(fecha)>=2010)
+g4 <- ggplot(ll.gripe) + geom_bar(aes(x=fecha,y=total.prev,fill=color),stat="identity",position = "dodge") + geom_line(aes(x=fecha,y=mean)) + facet_wrap(~year(fecha),ncol=2,scales = "free_x") + scale_fill_manual(values=cols,guide=FALSE) + labs(title="Número de ingresos urgentes de menores de 18 años por Neumonía y Gripe",subtitle="Comunidad de Madrid. Casos por 100.000 habitantes",caption="Encuesta de morbilidad.2010-2014") + xlab("Fecha") + ylab("") + theme_bw()
+plot(g4)
 ```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
