@@ -1,3 +1,3 @@
 importFrom("readr",  "read_fwf", "fwf_widths")
-import("lubridate","days")
+importFrom("lubridate","days")
 exportPattern("^[[:alpha:]]+")
