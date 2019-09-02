@@ -45,7 +45,7 @@ ReadZip <- function(year){
   data$edad_meses <- as.integer(data$edad_meses)
   data$edad_dias <- as.integer(data$edad_dias)
   data$estancia <- as.integer(data$estancia)
-  data$fecha_ingreso <- data$fecha_alta-days(data$estancia)
+  data$fecha_ingreso <- data$fecha_alta-lubridate::days(data$estancia)
   data$edad <- as.integer(round(data$edad_anyos+data$edad_meses/12+data$edad_dias/365))
   data$edad_anyos <- NULL
   data$edad_meses <- NULL
