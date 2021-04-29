@@ -75,7 +75,7 @@ ReadZip2015 <- function(year){
   unzip(zipfile = temp,files = file1,exdir = ".",junkpaths = TRUE)
   file2 <- fileu[grepl("md_EMH",fileu)]
   unzip(zipfile = temp,files = file2,exdir = ".",junkpaths = TRUE)
-  filezip <- sprintf("ftp://www.ine.es/temas/morbihos/disreg_morbi%s.zip",year,3,4)
+  filezip <- sprintf("ftp://www.ine.es/microdatos/morbihos/disreg_morbi%s.zip",year,3,4)
   temp2 <- tempfile()
   download.file(filezip,temp2)
   fileu <- unzip(temp2,list=TRUE)$Name
