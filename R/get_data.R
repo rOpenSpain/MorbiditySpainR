@@ -67,7 +67,7 @@ ReadZip <- function(year){
 #' data <- ReadZip(2015)
 
 ReadZip2015 <- function(year){
-  filezip <- sprintf("ftp://www.ine.es/temas/morbihos/datos_%s.zip",year,3,4)
+  filezip <- sprintf("ftp://www.ine.es/microdatos/morbihos/datos_%s.zip",year,3,4)
   temp <- tempfile()
   download.file(filezip,temp)
   fileu <- unzip(temp,list=TRUE)$Name
